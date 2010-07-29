@@ -60,9 +60,11 @@
             ,@(if gccsense-use-autopch
                   (list "-p" gccsense-autopch-program))
             "-d"
-            ,(if (string-match "\(?:cpp\|cc\|cxx\|CPP\|CC\|CXX\)" filename)
-                 gccsense-c++-driver
-               gccsense-c-driver)
+            ,(symbol-value 
+              (intern 
+               (concat "gccsense-" 
+                       (symbol-name 
+                        (c-mode-symbol "driver")))))
             "-a"
             ,tempfile
             ,filename
