@@ -5,7 +5,7 @@
 (tool-bar-mode nil)
 (setq inhibit-startup-screen t)
 
-(add-to-list 'load-path "/home/erkki/.emacs.d/")
+(add-to-list 'load-path "~/.emacs.d/")
 
 ;; save history
 (savehist-mode t)
@@ -43,6 +43,49 @@
 ;          (lambda ()
 ;            (gtags-mode)))
 
+;; anything
+(add-to-list 'load-path "~/.emacs.d/anything")
+(require 'anything)
+(require 'anything-config)
+(require 'anything-git)
+
+(defun anything-default ()
+  (interactive)
+  (setq anything-default-directory default-directory)
+  (anything-other-buffer
+   '(anything-c-source-buffers
+     anything-c-source-recentf
+     anything-c-source-files-in-current-dir
+     anything-c-source-git-files
+     anything-c-source-man-pages
+     anything-c-source-locate
+     anything-c-source-emacs-commands
+     anything-c-source-calculation-result)
+   nil))
+
+(defun anything-for-current-buffer ()
+  (interactive)
+  (setq anything-default-directory default-directory)
+  (anything-other-buffer
+   '(anything-c-source-occur
+     anything-c-source-fixme
+     anything-c-source-imenu
+     anything-c-source-ctags)
+   "*anything current buffer*"))
+
+(defun anything-for-current-project ()
+  (interactive)
+  (setq anything-default-directory default-directory)
+  (anything-other-buffer
+   '(anything-c-source-git-grep
+     anything-c-source-ctags)
+   "*anything current project*"))
+
+
+(global-set-key (kbd "C-x C-a") 'anything-default)
+(global-set-key (kbd "C-x C-b") 'anything-for-current-buffer)
+(global-set-key (kbd "C-x p") 'anything-for-current-project)
+
 ;; c-mode
 (c-set-offset 'innamespace 0)
 
@@ -54,7 +97,8 @@
   ;; If there is more than one, they won't work right.
  '(column-number-mode t)
  '(indent-tabs-mode nil)
- '(standard-indent 2))
+ '(standard-indent 2)
+ '(use-file-dialog nil))
 (custom-set-faces
   ;; custom-set-faces was added by Custom.
   ;; If you edit it by hand, you could mess it up, so be careful.
