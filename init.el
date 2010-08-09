@@ -7,13 +7,10 @@
 
 (add-to-list 'load-path "~/.emacs.d/")
 
-;; save history
-(savehist-mode t)
-(recentf-mode t)
-(global-set-key "\C-x\ \C-r" 'recentf-open-files)
-
-;; show paren
-(show-paren-mode t)
+;; iflipb
+(require 'iflipb)
+(global-set-key (kbd "<C-right>") 'iflipb-next-buffer)
+(global-set-key (kbd "<C-left>") 'iflipb-previous-buffer)
 
 ;; flyspell
 (dolist (hook '(text-mode-hook))
@@ -96,7 +93,11 @@
   ;; Your init file should contain only one such instance.
   ;; If there is more than one, they won't work right.
  '(column-number-mode t)
+ '(ido-mode t nil (ido))
  '(indent-tabs-mode nil)
+ '(recentf-mode t)
+ '(savehist-mode t nil (savehist))
+ '(show-paren-mode t)
  '(standard-indent 2)
  '(use-file-dialog nil))
 (custom-set-faces
