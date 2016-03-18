@@ -1,42 +1,105 @@
+;;; init.el-- - init
+;;; Commentary:
+;;; Code:
+
 (require 'package)
+(setq package-enable-at-startup nil)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
-(add-hook 'go-mode-hook 'auto-complete-mode)
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(add-hook 'after-init-hook 'global-company-mode)
-(add-hook 'after-init-hook 'yas-global-mode)
-
-(eval-after-load 'company
-  '(add-to-list 'company-backends 'company-irony))
-
-(eval-after-load 'company
-  '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
-
-(add-hook 'c++-mode-hook 'irony-mode)
-(add-hook 'c-mode-hook 'irony-mode)
-(add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-(setq irony-additional-clang-options '("-std=c++14"))
-
-(eval-after-load 'flycheck
-  '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+(eval-when-compile
+  (require 'use-package))
 
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
-(add-hook 'after-init-hook 'projectile-global-mode)
+(defun my-compile ()
+  (interactive)
+  (setq-local compilation-read-command nil)
+  (call-interactively 'compile))
 
-(global-set-key
- (kbd "<f5>") (lambda ()
-		(interactive)
-		(setq-local compilation-read-command nil)
-		(call-interactively 'compile)))
+(use-package cc-mode
+  :bind (:map c++-mode-map
+	      ("C-c f" . clang-format-buffer)
+	      ("M-p" . company-complete-common)
+	      ("<f5>" . my-compile)))
+
+(use-package clang-format
+  :ensure t
+  :commands clang-format clang-format-buffer clang-format-region)
+
+(use-package cmake-mode
+  :ensure t
+  :mode "CMakeLists.txt")
+
+(use-package company
+  :ensure t
+  :config
+  (global-company-mode t))
+
+(use-package company-go
+  :ensure t
+  :commands company-go)    
+
+(use-package flycheck
+  :ensure t
+  :commands flycheck-mode
+  :init
+  (add-hook 'c++-mode-hook 'flycheck-mode)
+  (add-hook 'c-mode-hook 'flycheck-mode))
+
+(use-package flycheck-irony
+  :ensure t
+  :commands flycheck-irony-setup
+  :init
+  (add-hook 'c++-mode-hook 'flycheck-irony-setup)
+  (add-hook 'c-mode-hook 'flycheck-irony-setup))
+
+(use-package go-mode
+  :ensure t
+  :mode "\\.go\\'"
+  :init
+  (defun my-go-company-hook ()
+    (setq company-backends 'company-go))
+  (add-hook 'go-mode-hook 'my-go-company-hook))
+
+(use-package helm
+  :ensure t
+  :bind
+  ("M-x" . helm-M-x)
+  ("C-x C-f" . helm-find-files)
+  :init
+  (helm-mode t))
+
+(use-package irony
+  :ensure t
+  :commands irony-mode
+  :init
+  (add-hook 'c++-mode-hook 'irony-mode)
+  (add-hook 'c-mode-hook 'irony-mode)
+  (defun my-irony-mode-hook ()
+    (setq company-backends '(company-irony-c-headers company-irony))
+    (setq irony-additional-clang-options '("-std=c++14")))
+  (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-global-mode))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(clang-format-executable "clang-format-3.7")
+ '(custom-enabled-themes (quote (tango-dark)))
+ '(package-selected-packages
+   (quote
+    (helm-projectile helm company-c-headers yasnippet use-package solarized-theme projectile markdown-mode go-mode flycheck-irony company-irony-c-headers company-irony cmake-mode clang-format)))
  '(safe-local-variable-values
    (quote
     ((eval add-hook
